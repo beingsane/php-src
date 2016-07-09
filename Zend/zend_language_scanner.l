@@ -1777,6 +1777,12 @@ string:
 }
 
 
+<INITIAL>"<?*" {
+	BEGIN(ST_IN_SCRIPTING);
+	RETURN_TOKEN(T_OPEN_TAG_WITH_ESCAPING_ECHO);
+}
+
+
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
@@ -1810,7 +1816,7 @@ inline_char_handler:
 		}
 
 		if (*YYCURSOR == '?') {
-			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=')) { /* Assume [ \t\n\r] follows "php" */
+			if (CG(short_tags) || !strncasecmp((char*)YYCURSOR + 1, "php", 3) || (*(YYCURSOR + 1) == '=') || (*(YYCURSOR + 1) == '*')) { /* Assume [ \t\n\r] follows "php" */
 
 				YYCURSOR--;
 				break;
