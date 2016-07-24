@@ -105,6 +105,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
+			case T_OPEN_TAG_WITH_ESCAPING_ECHO:
 			case T_CLOSE_TAG:
 			case T_LINE:
 			case T_FILE:
@@ -151,6 +152,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
+				case T_OPEN_TAG_WITH_ESCAPING_ECHO:
 				case T_CLOSE_TAG:
 				case T_WHITESPACE:
 				case T_COMMENT:
@@ -214,6 +216,7 @@ ZEND_API void zend_strip(void)
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
+				case T_OPEN_TAG_WITH_ESCAPING_ECHO:
 				case T_CLOSE_TAG:
 				case T_WHITESPACE:
 				case T_COMMENT:

@@ -1278,6 +1278,22 @@ simple_list:
 			APPEND_STR("__HALT_COMPILER()");
 		case ZEND_AST_ECHO:
 			APPEND_NODE_1("echo");
+		case ZEND_AST_ESCAPING_ECHO:
+
+			op = "echo";
+			smart_str_appends(str, op);
+
+			smart_str_appends(str, "escape_handler_call");
+			smart_str_appendc(str, "(");
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appendc(str, ", ");
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+			}
+			smart_str_appendc(str, ")");
+
+			break;
+
 		case ZEND_AST_THROW:
 			APPEND_NODE_1("throw");
 		case ZEND_AST_GOTO:

@@ -1714,6 +1714,9 @@ again:
 		case T_OPEN_TAG_WITH_ECHO:
 			retval = T_ECHO;
 			break;
+		case T_OPEN_TAG_WITH_ESCAPING_ECHO:
+			retval = T_ESCAPING_ECHO;
+			break;
 	}
 	if (Z_TYPE(zv) != IS_UNDEF) {
 		elem->ast = zend_ast_create_zval(&zv);
@@ -4114,6 +4117,45 @@ void zend_compile_echo(zend_ast *ast) /* {{{ */
 	opline->extended_value = 0;
 }
 /* }}} */
+
+
+void zend_compile_escaping_echo(zend_ast *ast) /* {{{ */
+{
+	// similar to zend_compile_echo()
+	zend_op *opline;
+	zend_ast *expr_ast = ast->child[0];
+	zend_ast *context_ast = ast->child[1];
+
+	znode expr_node;
+
+	{
+		// similar to zend_compile_shell_exec()
+
+		zval method_name;
+		zend_ast *method_name_ast, *args_ast, *call_ast;
+
+		ZVAL_STRING(&method_name, "escape_handler_call");
+
+		method_name_ast = zend_ast_create_zval(&method_name);
+		args_ast = zend_ast_create_list(1, ZEND_AST_ARG_LIST, expr_ast);
+		if (context_ast != NULL) {
+			zend_ast_list_add(args_ast, context_ast);
+		}
+
+		call_ast = zend_ast_create(ZEND_AST_CALL,
+			method_name_ast, args_ast
+		);
+
+		zend_compile_expr(&expr_node, call_ast);
+
+		zval_ptr_dtor(&method_name);
+	}
+
+	opline = zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+	opline->extended_value = 0;
+}
+/* }}} */
+
 
 void zend_compile_throw(zend_ast *ast) /* {{{ */
 {
@@ -7661,6 +7703,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_ECHO:
 			zend_compile_echo(ast);
 			break;
+		case ZEND_AST_ESCAPING_ECHO:
+			zend_compile_escaping_echo(ast);
+		break;
 		case ZEND_AST_THROW:
 			zend_compile_throw(ast);
 			break;

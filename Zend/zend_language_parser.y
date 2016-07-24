@@ -148,6 +148,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ELSE      "else (T_ELSE)"
 %token T_ENDIF     "endif (T_ENDIF)"
 %token T_ECHO       "echo (T_ECHO)"
+%token T_ESCAPING_ECHO "echo and context-dependent escaping (T_ESCAPING_ECHO)"
 %token T_DO         "do (T_DO)"
 %token T_WHILE      "while (T_WHILE)"
 %token T_ENDWHILE   "endwhile (T_ENDWHILE)"
@@ -207,6 +208,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
 %token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
 %token T_OPEN_TAG_WITH_ECHO "open tag with echo (T_OPEN_TAG_WITH_ECHO)"
+%token T_OPEN_TAG_WITH_ESCAPING_ECHO "open tag with echo and context-dependent escaping (T_OPEN_TAG_WITH_ESCAPING_ECHO)"
 %token T_CLOSE_TAG       "close tag (T_CLOSE_TAG)"
 %token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 %token T_START_HEREDOC   "heredoc start (T_START_HEREDOC)"
@@ -245,6 +247,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
+%type <ast> escaping_echo_expr
 %type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list class_const_decl name_list trait_adaptations method_body non_empty_for_exprs
@@ -432,6 +435,7 @@ statement:
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $2; }
+	|	T_ESCAPING_ECHO escaping_echo_expr ';'  { $$ = $2; }
 	|	T_INLINE_HTML { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
 	|	expr ';' { $$ = $1; }
 	|	T_UNSET '(' unset_variables ')' ';' { $$ = $3; }
@@ -835,6 +839,11 @@ echo_expr_list:
 ;
 echo_expr:
 	expr { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
+;
+
+escaping_echo_expr:
+		expr ',' expr { $$ = zend_ast_create(ZEND_AST_ESCAPING_ECHO, $1, $3); }
+	|   expr { $$ = zend_ast_create(ZEND_AST_ESCAPING_ECHO, $1, NULL); }
 ;
 
 for_exprs:

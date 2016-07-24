@@ -1,0 +1,9 @@
+// $Id$
+// vim:ft=javascript
+
+ARG_ENABLE("cde", "whether to enable context-dependent escaping support", "no");
+
+if (PHP_CDE == "yes") {
+	EXTENSION("cde", "cde.c");
+	AC_DEFINE('HAVE_CDE', 1, 'Have CDE');
+}
